@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Campgrounds</title>
+    
+    <!-- Include Leaflet CSS -->
+    <link rel="stylesheet" href="/leaflet/leaflet.css">
+    
+    <style>
+        /* Map container styling */
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <% layout('layouts/boilerplate') %>
+
+    <!-- Map container -->
+    <div id="map"></div>
+
+    <!-- Campground List -->
+    <div class="container mt-3">
+        <h1>All Campgrounds</h1>
+        <div>
+            <a href="/campgrounds/new">Add Campground</a>
+        </div>
+
+        <% for (let campground of campgrounds) { %>
+            <div class="card mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <% if (campground.images.length) { %>
+                            <img class="img-fluid" alt="" src="<%= campground.images[0].url %>">
+                        <% } else { %>
+                            <img class="img-fluid" alt=""
+                                src="https://res.cloudinary.com/douqbebwk/image/upload/v1600103881/YelpCamp/lz8jjv2gyynjil7lswf4.png">
+                        <% } %>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= campground.title %></h5>
+                            <p class="card-text"><%= campground.description %></p>
+                            <p class="card-text">
+                                <small class="text-muted"><%= campground.location %></small>
+                            </p>
+                            <a class="btn btn-primary" href="/campgrounds/<%= campground._id %>">
+                                View <%= campground.title %>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Include Leaflet JS -->
+    <script src="/leaflet/leaflet.js"></script>
+    <script>
+        const campgrounds = <%- JSON.stringify(campgrounds) %>;
+    </script>
+  <script>
+const map = L.map('map').setView([39.8283, -98.5795], 5);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+campgrounds.forEach(campground => {
+    if (campground.geometry && campground.geometry.coordinates.length === 2) {
+        const [lng, lat] = campground.geometry.coordinates;
+        const marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`<b>${campground.title}</b><br><a href="campgrounds/${campground._id}" target="_blank">Open it</a>`);
+    }
+});
+    </script>
+</body>
+</html>
